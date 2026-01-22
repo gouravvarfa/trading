@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Terminal | TraderinMe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020408;
+            --side: rgba(10, 12, 16, 0.98);
+            --accent: #3b82f6;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(13, 17, 23, 0.8);
+        }
+
+        /* --- RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* --- STEADY BACKGROUND --- */
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(1000px) rotateX(60deg) translateY(-100px);
+            z-index: -1;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* --- MOBILE HAMBURGER BUTTON --- */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--side);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 1100;
+            backdrop-filter: blur(10px);
+        }
+
+        /* --- SIDEBAR --- */
+        nav {
+            width: 280px;
+            background: var(--side);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            padding: 40px 25px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+        }
+
+        .pfp-box {
+            width: 60px; height: 60px;
+            margin-bottom: 20px;
+        }
+        .pfp-box img {
+            width: 100%; height: 100%;
+            border-radius: 16px;
+            border: 2px solid var(--accent);
+            padding: 3px;
+        }
+
+        .brand {
+            font-size: 1.1rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 40px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            display: block; padding: 15px 0; color: #64748b;
+            text-decoration: none; font-size: 0.85rem; font-weight: 600;
+            border-bottom: 1px solid transparent; transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: white; border-bottom: 1px solid var(--accent); }
+
+        .logout {
+            margin-top: auto; color: #ef4444; text-decoration: none;
+            font-weight: 700; font-size: 0.75rem; letter-spacing: 1px;
+            padding: 12px; border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px; text-align: center; transition: 0.3s;
+        }
+        .logout:hover { background: #ef4444; color: white; }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            margin-left: 280px; /* Space for Sidebar */
+            padding: 40px clamp(20px, 5vw, 60px);
+            transition: 0.4s;
+        }
+
+        .header-title h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: 30px; }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            padding: clamp(20px, 4vw, 40px);
+            margin-bottom: 30px;
+        }
+
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; margin-bottom: 15px; 
+        }
+
+        input, textarea {
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border); color: white; border-radius: 12px; outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        .btn-deploy {
+            width: 100%; padding: 18px; background: #fff; color: #000;
+            border: none; border-radius: 12px; font-weight: 800;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+        .btn-deploy:hover { background: var(--accent); color: white; transform: translateY(-2px); }
+
+        /* --- TABLE --- */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        td { padding: 20px 15px; border-bottom: 1px solid var(--border); }
+        .phase-badge { font-family: 'JetBrains Mono'; color: var(--accent); font-weight: 700; font-size: 0.75rem; }
+
+        /* --- RESPONSIVE STATES --- */
+        @media (max-width: 1024px) {
+            nav { transform: translateX(-100%); } /* Hide sidebar */
+            nav.active { transform: translateX(0); } /* Show sidebar */
+            
+            main { margin-left: 0; padding-top: 80px; }
+            .menu-toggle { display: block; }
+            .sidebar-overlay.active { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-overlay"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <nav id="sidebar">
+        <div class="pfp-box">
+            <img src="https://ui-avatars.com/api/?name=Yogesh+Septa&background=3b82f6&color=fff" alt="Admin">
+        </div>
+        <div class="brand">TRADERINME <span style="color:white">PRO</span></div>
+        
+        <div class="nav-links">
+            <a href="/" class="active">SYSTEM VIEWPORT</a>
+            <a href="/admin">ROADMAP ADMIN</a>
+        </div>
+
+        <a href="/logout" class="logout">TERMINATE SESSION</a>
+    </nav>
+
+    <main>
+        <div class="header-title">
+            <p style="font-family: 'JetBrains Mono'; color: var(--accent); font-size: 0.65rem; letter-spacing: 2px;">SECURE NODE MANAGER</p>
+            <h1>Command Center</h1>
+        </div>
+
+        <div class="glass-card">
+            <h3 style="margin-bottom: 20px; letter-spacing: -1px;">Deploy New Strategy</h3>
+            <form action="{{ url_for('add_schedule') }}" method="POST">
+                <div class="form-grid">
+                    <input type="number" name="day" placeholder="DAY_ID (e.g. 1)" required>
+                    <input type="text" name="title" placeholder="STRATEGY_TITLE" required>
+                </div>
+                <textarea name="description" placeholder="TECHNICAL_SPECIFICATIONS..." rows="2" style="margin-bottom: 15px;"></textarea>
+                <div class="form-grid">
+                    <input type="url" name="image_url" placeholder="IMAGE_LINK">
+                    <input type="url" name="meet_link" placeholder="STREAM_LINK">
+                </div>
+                <button type="submit" class="btn-deploy">Initialize Node</button>
+            </form>
+        </div>
+
+        <div class="glass-card" style="padding: 10px;">
+            <div class="table-container">
+                <table>
+                    <tbody>
+                        {% for s in schedules %}
+                        <tr>
+                            <td width="100"><span class="phase-badge">PHASE_{{ "%02d"|format(s.day|int) }}</span></td>
+                            <td>
+                                <div style="font-weight: 700; font-size: 1rem;">{{ s.title }}</div>
+                                <div style="color: #64748b; font-size: 0.8rem; margin-top: 4px;">{{ s.description[:60] }}...</div>
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{{ url_for('edit_schedule', id=s.id) }}" style="color: var(--accent); text-decoration: none; font-weight: 800; font-size: 0.7rem; margin-right: 15px; letter-spacing: 1px;">EDIT</a>
+                                <a href="{{ url_for('delete_schedule', id=s.id) }}" style="color: #ef4444; text-decoration: none; font-weight: 800; font-size: 0.7rem; letter-spacing: 1px;">DELETE</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Protocol | TraderinMe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #010204;
+            --accent: #3b82f6;
+            --glass: rgba(15, 20, 30, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.4);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-font-smoothing: antialiased; 
+        }
+
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px; /* Ensures space on mobile */
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background Glow */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* --- CENTRAL CARD --- */
+        .edit-card {
+            width: 100%;
+            max-width: 600px; /* Prevents stretching too wide on desktop */
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px); /* Safari support */
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: clamp(25px, 5vw, 45px); /* Responsive padding */
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header span {
+            font-family: 'JetBrains Mono';
+            color: var(--accent);
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 6vw, 2rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        /* --- FORM LAYOUT --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Stacks grid on mobile */
+        @media (max-width: 480px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 6px;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 16px 18px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.03);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        /* --- BUTTONS --- */
+        .action-container {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-update {
+            background: white;
+            color: black;
+        }
+
+        .btn-update:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.25);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: #ef4444;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="edit-card">
+        <div class="header">
+            <span>Admin_Authorized</span>
+            <h1>Edit Node Data</h1>
+        </div>
+
+        <form action="{{ url_for('edit_schedule', id=schedule.id) }}" method="POST">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Phase ID</label>
+                    <input type="number" name="day" value="{{ schedule.day }}" required>
+                </div>
+                <div class="input-group">
+                    <label>Module Title</label>
+                    <input type="text" name="title" value="{{ schedule.title }}" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Technical Specifications</label>
+                <textarea name="description" rows="4" required>{{ schedule.description }}</textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Media Source URL</label>
+                    <input type="url" name="image_url" value="{{ schedule.image_url }}">
+                </div>
+                <div class="input-group">
+                    <label>Live Stream Link</label>
+                    <input type="url" name="meet_link" value="{{ schedule.meet_link }}">
+                </div>
+            </div>
+
+            <div class="action-container">
+                <button type="submit" class="btn btn-update">Save Changes</button>
+                <a href="/admin" class="btn btn-cancel">Abort Operation</a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
